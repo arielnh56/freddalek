@@ -19,7 +19,7 @@ Keypad     http://playground.arduino.cc/code/Keypad
 Keypad_MCP https://github.com/joeyoung/arduino_keypads/tree/master/Keypad_MCP 
 WiiChuck   http://playground.arduino.cc/Main/WiiChuckClass
 
-WiiChuck is modified with the addition of the following method:
+WiiChuck is now included (as ov V1.0) modified with the addition of the following method:
 
 // returns pitch in tenths of degrees
 int readPitch10() {        
