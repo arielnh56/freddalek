@@ -25,18 +25,22 @@
 //#define EEPROM_eyeZero     0 // old
 //#define EEPROM_eyeMax      1 // old
 //#define EEPROM_eyeMin      2 // old
-#define EEPROM_domeZero    3
-#define EEPROM_domeMax     4
-#define EEPROM_domeMin     5
+//#define EEPROM_domeZero    3 // old
+//#define EEPROM_domeMax     4 // old
+//#define EEPROM_domeMin     5 // old
 #define EEPROM_headZeroV   6
-#define EEPROM_headZeroH   7
+//#define EEPROM_headZeroH   7 // old
 #define EEPROM_headUp      8
 #define EEPROM_headDown    9
-#define EEPROM_headLeft   10
-#define EEPROM_headRight  11
+// #define EEPROM_headLeft   10 // old
+// #define EEPROM_headRight  11 // old
 #define EEPROM_eyeACE     12 //3 bytes
 #define EEPROM_eyeMax     16 // 2 bytes
 #define EEPROM_eyeMin     18 // 2 bytes
+#define EEPROM_domeACE    20 //3 bytes
+#define EEPROM_domeMax    24 // 2 bytes
+#define EEPROM_domeMin    26 // 2 bytes
+#define EEPROM_headACE    28 // 3 bytes
 
 // movement defs
 #define MOVE_STOP 0

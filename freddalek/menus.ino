@@ -13,18 +13,18 @@ void checkKeyPad() {
       case '0':
         mode = MODE_ZERO;
         mode_2 = MODE_ZERO_WAIT;
-        lcdLine2 = nullmenu;
+        lcdLine2 = (char *)nullmenu;
         eyeTarget = 0;
         break;
       case '*':
         mode = MODE_FOLLOW;
         mode_2 = MODE_FOLLOW_LEVEL;
-        lcdLine2 = nullmenu;
+        lcdLine2 = (char *)nullmenu;
         break;
       case '#':
         mode = MODE_AUTO;
         mode_2 = MODE_AUTO_BASIC;
-        lcdLine2 = nullmenu;
+        lcdLine2 = (char *)nullmenu;
         mode_auto_lastchange = millis();
         break;
     }
@@ -69,25 +69,17 @@ void checkKeyPad() {
                 headDown = round(chuck.readPitch10() / 10);
                 EEPROM.write(EEPROM_headDown, headDown);
                 break;
-              case '4': // left limit
-                break;
-              case '6': // right limit
-                break;
               case '5': // center
                 headZeroV = round(chuck.readPitch10() / 10);
                 EEPROM.write(EEPROM_headZeroV, headZeroV);
-                headZeroH = headACE.rawPos();
-                headACE.setZero(headZeroH);
-                EEPROM.write(EEPROM_headZeroH, headZeroH);
+                headACE.setMpos(0);
                 break;
             } // switch key
             break;
           case MODE_ZERO_SET_EYE:
             switch (key) {
               case '1': // move up
-                Serial.println(eyeACE.rawPos());
-                Serial.println(eyeACE.mpos());
-                eyeTarget++;
+               eyeTarget++;
                 break;
               case '7': // move down
                 eyeTarget--;
@@ -139,10 +131,9 @@ void checkKeyPad() {
           case MODE_ZERO_SET_DOME:
             switch (key) {
               case '4': // move left
-                domeACE.setZero(domeACE.rawPos());
-                domeTarget = -1;
+                domeTarget--;
 #ifdef DEBUG
-                domePos = domeACE.pos();
+                domePos = domeACE.mpos();
                 Serial.print("domePos ");
                 Serial.println(domePos);
                 Serial.print("domeTarget ");
@@ -150,10 +141,9 @@ void checkKeyPad() {
 #endif
                 break;
               case '6': // move right
-                domeACE.setZero(domeACE.rawPos());
-                domeTarget = 1;
+                domeTarget++;
 #ifdef DEBUG
-                domePos = domeACE.pos();
+                domePos = domeACE.mpos();
                 Serial.print("domePos ");
                 Serial.println(domePos);
                 Serial.print("domeTarget ");
@@ -161,38 +151,48 @@ void checkKeyPad() {
 #endif
                 break;
               case '5': // set zero and find stops
-                tmp_u8 = domeACE.rawPos();
-                EEPROM.write(EEPROM_domeZero, tmp_u8);
-                domeACE.setZero(tmp_u8);
+                domeACE.setMpos(0);
                 domeTarget = 0;
                 digitalWrite(domeM1, HIGH);
                 digitalWrite(domeM2, LOW);
-                analogWrite(domePWM, 190);
-                delay(10000);
+                analogWrite(domePWM, DOME_MINSPEED + 8);
+                for (tmp_u8 = 0; tmp_u8 < 80; tmp_u8++) {
+                  delay(100);
+                  domePos = domeACE.mpos(); // frequent checks to catch rollovers
+                }
                 digitalWrite(domeM1, LOW);
                 digitalWrite(domeM2, LOW);
                 analogWrite(domePWM, 0);
-                tmp_8 = domeACE.pos();
-                domeMax = tmp_8 - 1; // overrun
-                EEPROM.write(EEPROM_domeMax, domeMax);
+                tmp_16 = domeACE.mpos();
+                domeMax = tmp_16 - 1; // overrun
+                EEPROM.update(EEPROM_domeMax, domeMax);
                 digitalWrite(domeM1, LOW);
                 digitalWrite(domeM2, HIGH);
-                analogWrite(domePWM, 190);
-                delay(15000);
+                analogWrite(domePWM, DOME_MINSPEED + 8);
+                for (tmp_u8 = 0; tmp_u8 < 80; tmp_u8++) {
+                  delay(100);
+                  domePos = domeACE.mpos(); // frequent checks to catch rollovers
+                }
                 digitalWrite(domeM1, LOW);
                 digitalWrite(domeM2, LOW);
                 analogWrite(domePWM, 0);
-                tmp_8 = domeACE.pos();
-                domeMin = tmp_8 + 1; // overrun
-                EEPROM.write(EEPROM_domeMin, domeMin);
+                tmp_16 = domeACE.mpos();
+                domeMin = tmp_16 + 2; // overrun
+                EEPROM.update(EEPROM_domeMin, domeMin);
 #ifdef DEBUG
-                domePos = domeACE.pos();
+                domePos = domeACE.mpos();
                 Serial.print("domePos ");
                 Serial.println(domePos);
                 Serial.print("domeTarget ");
                 Serial.println(domeTarget);
+                Serial.print("domeMax ");
+                Serial.println(domeMax);
+                Serial.print("domeMin ");
+                Serial.println(domeMin);
+
 #endif
                 break;
+
             } // switch key
             break;
         } // switch mode_2
@@ -207,7 +207,7 @@ void checkKeyPad() {
           case '2':
             mode_2 = MODE_FOLLOW_LEVEL;
             lcd.print("LEVEL     ");
-            eyeTarget = eyeZero;
+            eyeTarget = 0;
             break;
           default:
             lcd.print("LEVEL    ");
@@ -228,19 +228,19 @@ void checkKeyPad() {
             lcd.print("LOOK LEFT  ");
             mode_2 = MODE_AUTO_BASIC;
             domeTarget = -32;
-            eyeTarget = eyeZero;
+            eyeTarget = 0;
             break;
           case '5':
             lcd.print("LOOK FRONT ");
             mode_2 = MODE_AUTO_BASIC;
             domeTarget = 0;
-            eyeTarget = eyeZero;
+            eyeTarget = 0;
             break;
           case '6':
             lcd.print("LOOK RIGHT ");
             mode_2 = MODE_AUTO_BASIC;
             domeTarget = 32;
-            eyeTarget = eyeZero;
+            eyeTarget = 0;
             break;
           default:
             lcd.print("SELECT     ");

@@ -18,8 +18,8 @@ LiquidCrystal_PCF8574 lcd(LCDADDR);  // set the LCD address to 0x27 for a 16 cha
 #include <ACE128map87651234.h>
 
 ACE128 eyeACE((uint8_t)EYEACEADDR, (uint8_t*)encoderMap_87651234, EEPROM_eyeACE);
-ACE128 domeACE((uint8_t)DOMEACEADDR, (uint8_t*)encoderMap_87651234);
-ACE128 headACE((uint8_t)HEADACEADDR, (uint8_t*)encoderMap_87651234);
+ACE128 domeACE((uint8_t)DOMEACEADDR, (uint8_t*)encoderMap_87651234, EEPROM_domeACE);
+ACE128 headACE((uint8_t)HEADACEADDR, (uint8_t*)encoderMap_87651234, EEPROM_headACE);
 
 WiiChuck chuck = WiiChuck();
 

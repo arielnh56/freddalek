@@ -1,28 +1,8 @@
 void readEEPROM() {
   EEPROM.get(EEPROM_eyeMin, eyeMin);
   EEPROM.get(EEPROM_eyeMax, eyeMax);
-
-  tmp_u8 = EEPROM.read(EEPROM_domeZero);
-  if (tmp_u8 < 128) {
-    domeZero = tmp_u8;
-  } else {
-    domeZero = domeACE.rawPos();
-  }
-  domeACE.setZero(domeZero);
-
-  tmp_8 = EEPROM.read(EEPROM_domeMax);
-  if (tmp_8 <= 63 && tmp_8 > 0) {
-    domeMax = tmp_8;
-  } else {
-    domeMax = 32;
-  }
-
-  tmp_8 = EEPROM.read(EEPROM_domeMin);
-  if (tmp_8 >= -63 && tmp_8 < 0) {
-    domeMin = tmp_8;
-  } else {
-    domeMin = -32;
-  }
+  EEPROM.get(EEPROM_domeMin, domeMin);
+  EEPROM.get(EEPROM_domeMax, domeMax);
 
   tmp_u8 = EEPROM.read(EEPROM_headZeroV);
   if (tmp_u8 < 120 && tmp_u8 > 60) {
@@ -43,28 +23,6 @@ void readEEPROM() {
     headDown = tmp_u8;
   } else {
     headDown = headZeroV - 30;
-  }
-
-  tmp_u8 = EEPROM.read(EEPROM_headZeroH);
-  if (tmp_u8 < 128) {
-    headZeroH = tmp_u8;
-  } else {
-    headZeroH = headACE.rawPos();
-  }
-  headACE.setZero(headZeroH);
-
-  tmp_8 = EEPROM.read(EEPROM_headLeft);
-  if (tmp_8 >= -64 && tmp_8 < 0) {
-    headLeft = tmp_8;
-  } else {
-    headLeft = -32;
-  }
-
-  tmp_8 = EEPROM.read(EEPROM_headRight);
-  if (tmp_8 <= 63 && tmp_8 > 0) {
-    headRight = tmp_8;
-  } else {
-    headRight = 32;
   }
 
 }

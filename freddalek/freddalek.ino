@@ -5,13 +5,11 @@
 
 #define LOOPTIME 25
 // corresponding vars
-int8_t eyeZero, domeZero, headZeroH;  // ACE raw pos
-int8_t domeMax, domeMin, headLeft, headRight; // relative -64 to 63
-int16_t eyeMax, eyeMin;
+int16_t eyeMax, eyeMin, domeMax, domeMin;
 uint8_t headUp, headDown, headZeroV; // angle 90ish = horizontal
 
 // current positions
-int8_t domePos;
+int16_t domePos;
 int8_t headPos;
 uint8_t domeSpeed;
 uint8_t targetDomeSpeed;
@@ -37,14 +35,14 @@ uint32_t mode_auto_lastchange;
 
 int16_t eyeTarget;
 uint32_t eyeLastChange;
-int8_t domeTarget;
+int16_t domeTarget;
 uint32_t domeLastChange;
 uint32_t lastLoop;
 uint32_t lastLcdLine2;
 char lcdbuf[17];
 
 const char PROGMEM nullmenu[] = "                ";
-char* lcdLine2 = nullmenu;
+char* lcdLine2 = (char *)nullmenu;
 
 void loop() {
   if (lastLoop + LOOPTIME > millis()) {
@@ -63,8 +61,8 @@ void loop() {
   chuck.update();
   int chuckPitch = chuck.readPitch10();
   eyePos  = eyeACE.mpos();
-  domePos = domeACE.pos();
-  headPos = headACE.pos();
+  domePos = domeACE.mpos();
+  headPos = headACE.mpos();
 
   if (chuckPitch > headZeroV * 10 + 15) {
     digitalWrite(LED_HEAD_RED, LOW);
@@ -92,7 +90,7 @@ void loop() {
           } else if (tmp_16 > 0) { // up
             eyeTarget = constrain((tmp_16 - 50) / 10, 0, eyeMax);
           } else { // down
-            eyeTarget = constrain(eyeZero + (tmp_16 + 50) / 10, eyeMin, 0);
+            eyeTarget = constrain((tmp_16 + 50) / 10, eyeMin, 0);
           }
           domeTarget = headPos;
           break;
@@ -128,7 +126,7 @@ void loop() {
       break;
   }
 #ifdef DEBUG
-  //  domePos = domeACE.pos();
+  //  domePos = domeACE.mpos();
   //  Serial.print(" domeRawPos ");
   //  Serial.print(domeACE.rawPos());
   //  Serial.print(" eyeRawPos ");
