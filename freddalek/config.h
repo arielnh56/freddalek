@@ -22,9 +22,9 @@
 #define LED_HEAD_RED    4 // head indicator
 
 // EEPROM locations for saved settings
-#define EEPROM_eyeZero     0
-#define EEPROM_eyeMax      1
-#define EEPROM_eyeMin      2
+//#define EEPROM_eyeZero     0 // old
+//#define EEPROM_eyeMax      1 // old
+//#define EEPROM_eyeMin      2 // old
 #define EEPROM_domeZero    3
 #define EEPROM_domeMax     4
 #define EEPROM_domeMin     5
@@ -34,6 +34,9 @@
 #define EEPROM_headDown    9
 #define EEPROM_headLeft   10
 #define EEPROM_headRight  11
+#define EEPROM_eyeACE     12 //3 bytes
+#define EEPROM_eyeMax     16 // 2 bytes
+#define EEPROM_eyeMin     18 // 2 bytes
 
 // movement defs
 #define MOVE_STOP 0

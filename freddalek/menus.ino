@@ -14,7 +14,7 @@ void checkKeyPad() {
         mode = MODE_ZERO;
         mode_2 = MODE_ZERO_WAIT;
         lcdLine2 = nullmenu;
-        eyeTarget = eyeZero;
+        eyeTarget = 0;
         break;
       case '*':
         mode = MODE_FOLLOW;
@@ -45,7 +45,7 @@ void checkKeyPad() {
               case '2':
                 lcd.print("SET EYE     ");
                 mode_2 = MODE_ZERO_SET_EYE;
-                lcdLine2 = (char *)F("1 MOVE UP       7 MOVE DOWN     2 FIND UP STOP  8 FIND DOWN STOP5 SET ZERO      ");
+                lcdLine2 = (char *)F("1 MOVE UP       7 MOVE DOWN     5 ZERO AND STOPS");
                 break;
               case '3':
                 lcd.print("SET DOME    ");
@@ -85,43 +85,54 @@ void checkKeyPad() {
           case MODE_ZERO_SET_EYE:
             switch (key) {
               case '1': // move up
+                Serial.println(eyeACE.rawPos());
+                Serial.println(eyeACE.mpos());
                 eyeTarget++;
                 break;
               case '7': // move down
                 eyeTarget--;
                 break;
-              case '2': // set max m- find upper stop
+              case '5': // set zero and find stops
+                eyeACE.setMpos(0);
+                eyeTarget = 0;
                 digitalWrite(eyeM1, HIGH);
                 digitalWrite(eyeM2, LOW);
-                analogWrite(eyePWM, EYE_MINSPEED_UP);
-                delay(20000);
+                analogWrite(eyePWM, EYE_MINSPEED_UP + 10);
+                for (tmp_u8 = 0; tmp_u8 < 50; tmp_u8++) {
+                  delay(100);
+                  eyePos = eyeACE.mpos(); // frequent checks to catch rollovers
+                }
                 digitalWrite(eyeM1, LOW);
                 digitalWrite(eyeM2, LOW);
                 analogWrite(eyePWM, 0);
-                tmp_u8 = eyeACE.upos();
-                eyeMax = tmp_u8 + 2; // overrun
-                if (eyeMax > 127) eyeMax = eyeMax - 128; // roll
-                EEPROM.write(EEPROM_eyeMax, eyeMax);
-                eyeTarget = eyeMax;
-                break;
-              case '8': // set min - find lower stop
+                tmp_16 = eyeACE.mpos();
+                eyeMax = tmp_16 - 1; // overrun
+                EEPROM.update(EEPROM_eyeMax, eyeMax);
                 digitalWrite(eyeM1, LOW);
                 digitalWrite(eyeM2, HIGH);
-                analogWrite(eyePWM, EYE_MINSPEED_DOWN);
-                delay(10000);
+                analogWrite(eyePWM, EYE_MINSPEED_DOWN + 8);
+                for (tmp_u8 = 0; tmp_u8 < 80; tmp_u8++) {
+                  delay(100);
+                  eyePos = eyeACE.mpos(); // frequent checks to catch rollovers
+                }
                 digitalWrite(eyeM1, LOW);
                 digitalWrite(eyeM2, LOW);
                 analogWrite(eyePWM, 0);
-                tmp_u8 = eyeACE.rawPos();
-                eyeMin = tmp_u8 - 2; // overrun
-                if (eyeMin > 127) eyeMin = eyeMin - 128; // roll
-                EEPROM.write(EEPROM_eyeMin, eyeMin);
-                eyeACE.setZero(eyeMin);
-                eyeTarget = 0;
-                break;
-              case '5': // set zero
-                eyeZero = constrain(eyeACE.upos(), 1, 127);
-                EEPROM.write(EEPROM_eyeZero, eyeZero);
+                tmp_16 = eyeACE.mpos();
+                eyeMin = tmp_16 + 2; // overrun
+                EEPROM.update(EEPROM_eyeMin, eyeMin);
+#ifdef DEBUG
+                eyePos = eyeACE.mpos();
+                Serial.print("eyePos ");
+                Serial.println(eyePos);
+                Serial.print("eyeTarget ");
+                Serial.println(eyeTarget);
+                Serial.print("eyeMax ");
+                Serial.println(eyeMax);
+                Serial.print("eyeMin ");
+                Serial.println(eyeMin);
+
+#endif
                 break;
             } // switch key
             break;

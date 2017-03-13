@@ -5,9 +5,9 @@
 
 #define LOOPTIME 25
 // corresponding vars
-int8_t eyeMin, domeZero, headZeroH;  // ACE raw pos
+int8_t eyeZero, domeZero, headZeroH;  // ACE raw pos
 int8_t domeMax, domeMin, headLeft, headRight; // relative -64 to 63
-uint8_t eyeMax, eyeZero;
+int16_t eyeMax, eyeMin;
 uint8_t headUp, headDown, headZeroV; // angle 90ish = horizontal
 
 // current positions
@@ -15,7 +15,7 @@ int8_t domePos;
 int8_t headPos;
 uint8_t domeSpeed;
 uint8_t targetDomeSpeed;
-uint8_t eyePos;
+int16_t eyePos;
 uint8_t eyeSpeed;
 uint8_t targetEyeSpeed;
 int8_t eyeDir = MOVE_STOP;
@@ -35,7 +35,7 @@ uint32_t MODE_AUTO_SCAN_TIMER = 0;
 uint32_t mode_auto_lastchange;
 
 
-uint8_t eyeTarget;
+int16_t eyeTarget;
 uint32_t eyeLastChange;
 int8_t domeTarget;
 uint32_t domeLastChange;
@@ -62,7 +62,7 @@ void loop() {
    }
   chuck.update();
   int chuckPitch = chuck.readPitch10();
-  eyePos  = eyeACE.upos();
+  eyePos  = eyeACE.mpos();
   domePos = domeACE.pos();
   headPos = headACE.pos();
 
@@ -87,18 +87,18 @@ void loop() {
       switch (mode_2) {
         case MODE_FOLLOW_NORMAL:
           tmp_16 = chuckPitch - headZeroV * 10;
-          if (abs(tmp_16) < 30) {
-            eyeTarget = eyeZero;
+          if (abs(tmp_16) < 50) {
+            eyeTarget = 0;
           } else if (tmp_16 > 0) { // up
-            eyeTarget = constrain(eyeZero + (tmp_16 - 30) / 10, eyeZero, eyeMax);
+            eyeTarget = constrain((tmp_16 - 50) / 10, 0, eyeMax);
           } else { // down
-            eyeTarget = constrain(eyeZero + (tmp_16 + 30) / 10, 0, eyeZero);
+            eyeTarget = constrain(eyeZero + (tmp_16 + 50) / 10, eyeMin, 0);
           }
           domeTarget = headPos;
           break;
 
         case MODE_FOLLOW_LEVEL:
-          eyeTarget = eyeZero;
+          eyeTarget = 0;
           domeTarget = headPos;
           break;
       }
@@ -127,7 +127,7 @@ void loop() {
       }
       break;
   }
-#ifdef DEBUGX
+#ifdef DEBUG
   //  domePos = domeACE.pos();
   //  Serial.print(" domeRawPos ");
   //  Serial.print(domeACE.rawPos());
@@ -143,7 +143,7 @@ void loop() {
   //  Serial.print(domeSpeed);
   //  Serial.print(" targetDomeSpeed ");
   //  Serial.println(targetDomeSpeed);
-  Serial.print(millis());
+  /*Serial.print(millis());
   Serial.print(" ");
   Serial.print(micros());
   Serial.print(" ");
@@ -159,6 +159,7 @@ void loop() {
   Serial.print(targetEyeSpeed);
   Serial.print(" chuckPitch ");
   Serial.println(chuckPitch);
+  */
 #endif
 
   // motor control

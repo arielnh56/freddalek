@@ -28,11 +28,11 @@ void setup() {
   analogWrite(domePWM, 0);
 
   readEEPROM();
-  mode = MODE_ZERO;
-  mode_2 = MODE_ZERO_GOTO_ZERO;
-  eyeTarget = eyeZero;
+  mode = MODE_AUTO;
+  mode_2 = MODE_AUTO_BASIC;
+  eyeTarget = 0;
   eyeLastChange = millis();
-  domeTarget = 0;
+  domeTarget = -32; // lookleft - we may be open
   domeLastChange = millis();
 
   pinMode(LED_HEAD_RED, OUTPUT);

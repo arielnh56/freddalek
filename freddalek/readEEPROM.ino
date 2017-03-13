@@ -1,25 +1,6 @@
 void readEEPROM() {
-  tmp_u8 = EEPROM.read(EEPROM_eyeMin);
-  if (tmp_u8 < 128) {
-    eyeMin = tmp_u8;
-  } else {
-    eyeMin = eyeACE.rawPos();
-  }
-  eyeACE.setZero(eyeMin);
-
-  tmp_u8 = EEPROM.read(EEPROM_eyeMax);
-  if (tmp_u8 <= 127) {
-    eyeMax = tmp_u8;
-  } else {
-    eyeMax = 100;
-  }
-
-  tmp_u8 = EEPROM.read(EEPROM_eyeZero);
-  if (tmp_u8 < eyeMax) {
-    eyeZero = tmp_u8;
-  } else {
-    eyeZero = eyeMax - 20;
-  }
+  EEPROM.get(EEPROM_eyeMin, eyeMin);
+  EEPROM.get(EEPROM_eyeMax, eyeMax);
 
   tmp_u8 = EEPROM.read(EEPROM_domeZero);
   if (tmp_u8 < 128) {
