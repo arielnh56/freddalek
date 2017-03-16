@@ -53,7 +53,7 @@ void setup() {
   delay(2000);
   lastLcdLine2 = millis();
   lcd.clear();
-  lcd.print("ZERO GOTO_ZERO");
+  lcd.print("AUTO LOOK LEFT");
 
 }
 

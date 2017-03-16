@@ -10,7 +10,7 @@ uint8_t headUp, headDown, headZeroV; // angle 90ish = horizontal
 
 // current positions
 int16_t domePos;
-int8_t headPos;
+int16_t headPos;
 uint8_t domeSpeed;
 uint8_t targetDomeSpeed;
 int16_t eyePos;
@@ -52,17 +52,17 @@ void loop() {
 
   if (lastLcdLine2 + 1000 < millis()) {
     lastLcdLine2 = millis();
-    int8_t numMenus = strlen_P(lcdLine2)/16;
-    int8_t offset = ((int)(lastLcdLine2/1000) % numMenus) * 16;
-    strncpy_P(lcdbuf,lcdLine2+offset,16);
-    lcd.setCursor(0,1);
+    int8_t numMenus = strlen_P(lcdLine2) / 16;
+    int8_t offset = ((int)(lastLcdLine2 / 1000) % numMenus) * 16;
+    strncpy_P(lcdbuf, lcdLine2 + offset, 16);
+    lcd.setCursor(0, 1);
     lcd.print(lcdbuf);
-   }
+  }
   chuck.update();
   int chuckPitch = chuck.readPitch10();
   eyePos  = eyeACE.mpos();
-  domePos = domeACE.mpos();
-  headPos = headACE.mpos();
+  domePos = domeACE.pos();
+  headPos = headACE.pos();
 
   if (chuckPitch > headZeroV * 10 + 15) {
     digitalWrite(LED_HEAD_RED, LOW);
@@ -126,38 +126,43 @@ void loop() {
       break;
   }
 #ifdef DEBUG
-  //  domePos = domeACE.mpos();
-  //  Serial.print(" domeRawPos ");
-  //  Serial.print(domeACE.rawPos());
-  //  Serial.print(" eyeRawPos ");
-  //  Serial.print(eyeACE.rawPos());
-  //  Serial.print("domePos ");
-  //  Serial.print(domePos);
-  //  Serial.print(" domeTarget ");
-  //  Serial.print(domeTarget);
-  //  Serial.print(" domeDir ");
-  //  Serial.print(domeDir);
-  //  Serial.print(" domeSpeed ");
-  //  Serial.print(domeSpeed);
-  //  Serial.print(" targetDomeSpeed ");
-  //  Serial.println(targetDomeSpeed);
-  /*Serial.print(millis());
-  Serial.print(" ");
-  Serial.print(micros());
-  Serial.print(" ");
-  Serial.print(" eyePos ");
-  Serial.print(eyePos);
-  Serial.print(" eyeTarget ");
-  Serial.print(eyeTarget);
-  Serial.print(" eyeDir ");
-  Serial.print(eyeDir);
-  Serial.print(" eyeSpeed ");
-  Serial.print(eyeSpeed);
-  Serial.print(" targetEyeSpeed ");
-  Serial.print(targetEyeSpeed);
-  Serial.print(" chuckPitch ");
-  Serial.println(chuckPitch);
-  */
+  /*
+    Serial.print(" domeRawPos ");
+    Serial.print(domeACE.rawPos());
+    Serial.print("domePos ");
+    Serial.print(domePos);
+    Serial.print(" domeTarget ");
+    Serial.print(domeTarget);
+    Serial.print(" domeDir ");
+    Serial.print(domeDir);
+    Serial.print(" domeSpeed ");
+    Serial.print(domeSpeed);
+    Serial.print(" targetDomeSpeed ");
+    Serial.println(targetDomeSpeed);
+    Serial.print(millis());
+    Serial.print(" ");
+    Serial.print(micros());
+    Serial.print(" ");
+
+    Serial.print(" eyeRawPos ");
+    Serial.print(eyeACE.rawPos());
+    Serial.print(" eyePos ");
+    Serial.print(eyePos);
+    Serial.print(" eyeTarget ");
+    Serial.print(eyeTarget);
+    Serial.print(" eyeDir ");
+    Serial.print(eyeDir);
+    Serial.print(" eyeMin ");
+    Serial.print(eyeMin);
+    Serial.print(" eyeMax ");
+    Serial.print(eyeMax);
+    Serial.print(" eyeSpeed ");
+    Serial.print(eyeSpeed);
+    Serial.print(" targetEyeSpeed ");
+    Serial.print(targetEyeSpeed);
+    Serial.print(" chuckPitch ");
+    Serial.println(chuckPitch);
+*/ 
 #endif
 
   // motor control

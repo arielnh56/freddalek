@@ -99,7 +99,7 @@ void checkKeyPad() {
                 analogWrite(eyePWM, 0);
                 tmp_16 = eyeACE.mpos();
                 eyeMax = tmp_16 - 1; // overrun
-                EEPROM.update(EEPROM_eyeMax, eyeMax);
+                EEPROM.put(EEPROM_eyeMax, eyeMax);
                 digitalWrite(eyeM1, LOW);
                 digitalWrite(eyeM2, HIGH);
                 analogWrite(eyePWM, EYE_MINSPEED_DOWN + 8);
@@ -112,7 +112,7 @@ void checkKeyPad() {
                 analogWrite(eyePWM, 0);
                 tmp_16 = eyeACE.mpos();
                 eyeMin = tmp_16 + 2; // overrun
-                EEPROM.update(EEPROM_eyeMin, eyeMin);
+                EEPROM.put(EEPROM_eyeMin, eyeMin);
 #ifdef DEBUG
                 eyePos = eyeACE.mpos();
                 Serial.print("eyePos ");
@@ -133,7 +133,7 @@ void checkKeyPad() {
               case '4': // move left
                 domeTarget--;
 #ifdef DEBUG
-                domePos = domeACE.mpos();
+                domePos = domeACE.pos();
                 Serial.print("domePos ");
                 Serial.println(domePos);
                 Serial.print("domeTarget ");
@@ -143,7 +143,7 @@ void checkKeyPad() {
               case '6': // move right
                 domeTarget++;
 #ifdef DEBUG
-                domePos = domeACE.mpos();
+                domePos = domeACE.pos();
                 Serial.print("domePos ");
                 Serial.println(domePos);
                 Serial.print("domeTarget ");
@@ -158,29 +158,29 @@ void checkKeyPad() {
                 analogWrite(domePWM, DOME_MINSPEED + 8);
                 for (tmp_u8 = 0; tmp_u8 < 80; tmp_u8++) {
                   delay(100);
-                  domePos = domeACE.mpos(); // frequent checks to catch rollovers
+                  domePos = domeACE.pos(); // frequent checks to catch rollovers
                 }
                 digitalWrite(domeM1, LOW);
                 digitalWrite(domeM2, LOW);
                 analogWrite(domePWM, 0);
-                tmp_16 = domeACE.mpos();
+                tmp_16 = domeACE.pos();
                 domeMax = tmp_16 - 1; // overrun
-                EEPROM.update(EEPROM_domeMax, domeMax);
+                EEPROM.put(EEPROM_domeMax, domeMax);
                 digitalWrite(domeM1, LOW);
                 digitalWrite(domeM2, HIGH);
                 analogWrite(domePWM, DOME_MINSPEED + 8);
                 for (tmp_u8 = 0; tmp_u8 < 80; tmp_u8++) {
                   delay(100);
-                  domePos = domeACE.mpos(); // frequent checks to catch rollovers
+                  domePos = domeACE.pos(); // frequent checks to catch rollovers
                 }
                 digitalWrite(domeM1, LOW);
                 digitalWrite(domeM2, LOW);
                 analogWrite(domePWM, 0);
-                tmp_16 = domeACE.mpos();
+                tmp_16 = domeACE.pos();
                 domeMin = tmp_16 + 2; // overrun
-                EEPROM.update(EEPROM_domeMin, domeMin);
+                EEPROM.put(EEPROM_domeMin, domeMin);
 #ifdef DEBUG
-                domePos = domeACE.mpos();
+                domePos = domeACE.pos();
                 Serial.print("domePos ");
                 Serial.println(domePos);
                 Serial.print("domeTarget ");

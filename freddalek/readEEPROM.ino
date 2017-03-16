@@ -1,6 +1,18 @@
 void readEEPROM() {
   EEPROM.get(EEPROM_eyeMin, eyeMin);
   EEPROM.get(EEPROM_eyeMax, eyeMax);
+#ifdef DEBUG
+                eyePos = eyeACE.mpos();
+                Serial.print("eyePos ");
+                Serial.println(eyePos);
+                Serial.print("eyeTarget ");
+                Serial.println(eyeTarget);
+                Serial.print("eyeMax ");
+                Serial.println(eyeMax);
+                Serial.print("eyeMin ");
+                Serial.println(eyeMin);
+
+#endif
   EEPROM.get(EEPROM_domeMin, domeMin);
   EEPROM.get(EEPROM_domeMax, domeMax);
 
