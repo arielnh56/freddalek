@@ -12,7 +12,6 @@ void setup() {
   domeACE.begin();
   headACE.begin();
   headACE.reverse(true);
-  handACE.begin();
 
   pinMode(eyeM1, OUTPUT);
   digitalWrite(eyeM1, LOW);
@@ -29,24 +28,12 @@ void setup() {
   analogWrite(domePWM, 0);
 
   readEEPROM();
-  mode = MODE_AUTO;
-  mode_2 = MODE_AUTO_BASIC;
-  eyeTarget = 0;
+  mode = MODE_ZERO;
+  mode_2 = MODE_ZERO_GOTO_ZERO;
+  eyeTarget = eyeZero;
   eyeLastChange = millis();
-  domeTarget = -32; // lookleft - we may be open
+  domeTarget = 0;
   domeLastChange = millis();
-
-  eyeKp = eyeKpS / 100.0;
-  eyeKi = eyeKiS / 100.0;
-  eyeKd = eyeKdS / 100.0;
-#ifdef DEBUG
-  Serial.print("eyeKp "); Serial.println(eyeKp);
-  Serial.print("eyeKi "); Serial.println(eyeKi);
-  Serial.print("eyeKd "); Serial.println(eyeKd);
-#endif
-  domeKp = domeKpS / 100.0;
-  domeKi = domeKiS / 100.0;
-  domeKd = domeKdS / 100.0;
 
   pinMode(LED_HEAD_RED, OUTPUT);
   pinMode(LED_HEAD_YELLOW, OUTPUT);
@@ -66,10 +53,7 @@ void setup() {
   delay(2000);
   lastLcdLine2 = millis();
   lcd.clear();
-  lcd.print("AUTO LOOK LEFT");
-  domePos = domeACE.pos();
-  domeInput = domePos;
-  domeSetpoint = domeTarget;
-  domePID.SetMode(AUTOMATIC);
+  lcd.print("ZERO GOTO_ZERO");
+
 }
 

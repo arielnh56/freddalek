@@ -37,5 +37,16 @@ void readEEPROM() {
     headDown = headZeroV - 30;
   }
 
+  EEPROM.get(EEPROM_domeKp, domeKpS);
+  EEPROM.get(EEPROM_domeKi, domeKiS);
+  EEPROM.get(EEPROM_domeKd, domeKdS);
+  EEPROM.get(EEPROM_eyeKp, eyeKpS);
+  EEPROM.get(EEPROM_eyeKi, eyeKiS);
+  EEPROM.get(EEPROM_eyeKd, eyeKdS);
+#ifdef DEBUG
+  Serial.print("eyeKpS "); Serial.println(eyeKpS);
+  Serial.print("eyeKiS "); Serial.println(eyeKiS);
+  Serial.print("eyeKdS "); Serial.println(eyeKdS);
+#endif
 }
 

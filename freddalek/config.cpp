@@ -16,10 +16,13 @@ Keypad_MCP keypad = Keypad_MCP( makeKeymap(keys), rowPins, colPins, KPROWS, KPCO
 LiquidCrystal_PCF8574 lcd(LCDADDR);  // set the LCD address to 0x27 for a 16 chars and 2 line display
 
 #include <ACE128map87651234.h>
+#include <ACE128map87654321.h>
 
 ACE128 eyeACE((uint8_t)EYEACEADDR, (uint8_t*)encoderMap_87651234, EEPROM_eyeACE);
 ACE128 domeACE((uint8_t)DOMEACEADDR, (uint8_t*)encoderMap_87651234, EEPROM_domeACE);
 ACE128 headACE((uint8_t)HEADACEADDR, (uint8_t*)encoderMap_87651234, EEPROM_headACE);
+ACE128 handACE((uint8_t)HANDACEADDR, (uint8_t*)encoderMap_87654321);
 
 WiiChuck chuck = WiiChuck();
+
 

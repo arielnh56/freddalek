@@ -1,11 +1,12 @@
 #ifndef Config_h
 #define Config_h
-#define DEBUG
+//#define DEBUG
 
 // I2C Addresses
 #define DOMEACEADDR 0x00    // 0x20
 #define EYEACEADDR  0x01    // 0x21
 #define HEADACEADDR 0x02    // 0x22
+#define HANDACEADDR 0x3C    // 0x3C
 #define LCDADDR     0x26
 #define KPADDR      0x27
 
@@ -41,6 +42,12 @@
 #define EEPROM_domeMax    24 // 2 bytes
 #define EEPROM_domeMin    26 // 2 bytes
 #define EEPROM_headACE    28 // 3 bytes
+#define EEPROM_domeKp     32 // 2 bytes
+#define EEPROM_domeKi     34 // 2 bytes
+#define EEPROM_domeKd     36 // 2 bytes
+#define EEPROM_eyeKp      38 // 2 bytes
+#define EEPROM_eyeKi      40 // 2 bytes
+#define EEPROM_eyeKd      42 // 2 bytes
 
 // movement defs
 #define MOVE_STOP 0
@@ -69,6 +76,8 @@
 #define MODE_ZERO_SET_HEAD 2
 #define MODE_ZERO_SET_EYE 3
 #define MODE_ZERO_SET_DOME 4
+#define MODE_ZERO_SET_DOME_PID 5
+#define MODE_ZERO_SET_EYE_PID 6
 #define MODE_FOLLOW_NORMAL 0
 #define MODE_FOLLOW_LEVEL 1
 #define MODE_AUTO_BASIC 0
@@ -76,6 +85,10 @@
 #define MODE_AUTO_SCAN_PAUSE 0
 #define MODE_AUTO_SCAN_RIGHT 1
 #define MODE_AUTO_SCAN_LEFT 2
+#define MODE_PID_KP 0
+#define MODE_PID_KI 1
+#define MODE_PID_KD 2
+
 
 #include "Wire.h"
 #include "WiiChuck.h"
@@ -95,6 +108,7 @@ extern LiquidCrystal_PCF8574 lcd;
 extern ACE128 eyeACE;
 extern ACE128 domeACE;
 extern ACE128 headACE;
+extern ACE128 handACE;
 
 
 #endif
