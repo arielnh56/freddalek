@@ -1,3 +1,4 @@
+void(* resetFunc) (void) = 0; //declare reset function @ address 0
 
 void checkKeyPad() {
   char key = keypad.getKey();
@@ -33,28 +34,46 @@ void checkKeyPad() {
 
     switch (mode) {
       case MODE_ZERO:
-        lcd.print("ZERO ");
         switch (mode_2) {
           case MODE_ZERO_WAIT:
             switch (key) {
               case '1':
-                lcd.print("SET HEAD    ");
+                lcd.print(F("ZERO SET HEAD   "));
                 lcdLine2 = (char *)F("2 SET UP LIMIT  8 SET DOWN LIMIT5 SET CENTER    ");
                 mode_2 = MODE_ZERO_SET_HEAD;
                 break;
               case '2':
-                lcd.print("SET EYE     ");
+                lcd.print(F("ZERO SET EYE    "));
                 mode_2 = MODE_ZERO_SET_EYE;
                 lcdLine2 = (char *)F("1 MOVE UP       7 MOVE DOWN     5 ZERO AND STOPS");
                 break;
               case '3':
-                lcd.print("SET DOME    ");
+                lcd.print(F("ZERO SET DOME   "));
                 mode_2 = MODE_ZERO_SET_DOME;
                 lcdLine2 = (char *)F("4 MOVE LEFT     6 MOVE RIGHT    5 ZERO AND STOPS");
                 break;
+              case '4':
+                lcd.print(F("EYE Kp          "));
+                mode_2 = MODE_ZERO_SET_EYE_PID;
+                mode_3 = MODE_PID_KP;
+                lcdLine2 = (char *)F("1 SELECT Kp     2 SELECT Ki     3 SELECT Kd     4 SET           5 ZERO          6 RESTORE       ");
+                handACE.setMpos((int16_t) (eyeKp * 100.0));
+                break;
+              case '5':
+                lcd.print(F("DOME Kp         "));
+                mode_2 = MODE_ZERO_SET_DOME_PID;
+                mode_3 = MODE_PID_KP;
+                lcdLine2 = (char *)F("1 SELECT Kp     2 SELECT Ki     3 SELECT Kd     4 SET           5 ZERO          6 RESTORE       ");
+                handACE.setMpos((int16_t) (domeKp * 100.0));
+                break;
+              case '6':
+                lcd.print(F("RESET           "));
+                delay(1000);
+                resetFunc();
+                break;
               default:
-                lcd.print("SELECT      ");
-                lcdLine2 = (char *)F("1 SET HEAD      2 SET EYE       3 SET DOME      ");
+                lcd.print(F("SELECT          "));
+                lcdLine2 = (char *)F("1 SET HEAD      2 SET EYE       3 SET DOME      4 SET EYE PID   5 SET DOME PID  6 RESET         ");
                 break;
             } // switch key
             break;
@@ -79,7 +98,7 @@ void checkKeyPad() {
           case MODE_ZERO_SET_EYE:
             switch (key) {
               case '1': // move up
-               eyeTarget++;
+                eyeTarget++;
                 break;
               case '7': // move down
                 eyeTarget--;
@@ -193,6 +212,120 @@ void checkKeyPad() {
 #endif
                 break;
 
+            } // switch key
+            break;
+          case MODE_ZERO_SET_EYE_PID:
+            switch (key) {
+              case '1': // select Kp
+                Serial.print("eyeKp "); Serial.println(eyeKp);
+                mode_3 = MODE_PID_KP;
+                handACE.setMpos((int16_t) (eyeKp * 100.0));
+                lcd.setCursor(5, 0);
+                lcd.print("p");
+                break;
+              case '2': // select Ki
+                mode_3 = MODE_PID_KI;
+                handACE.setMpos((int16_t) (eyeKi * 100.0));
+                lcd.setCursor(5, 0);
+                lcd.print("i");
+                break;
+              case '3': // select Kd
+                mode_3 = MODE_PID_KD;
+                handACE.setMpos((int16_t) (eyeKd * 100.0));
+                lcd.setCursor(5, 0);
+                lcd.print("d");
+                break;
+              case '4': // set K?
+                if (mode_3 == MODE_PID_KP) {
+                  eyeKpS = (int16_t) (eyeKp * 100.0);
+                  EEPROM.put(EEPROM_eyeKp, eyeKpS);
+                } else if (mode_3 == MODE_PID_KI) {
+                  eyeKiS = (int16_t) (eyeKi * 100.0);
+                  EEPROM.put(EEPROM_eyeKi, eyeKiS);
+                } else if (mode_3 == MODE_PID_KD) {
+                  eyeKdS = (int16_t) (eyeKd * 100.0);
+                  EEPROM.put(EEPROM_eyeKd, eyeKdS);
+                }
+                break;
+              case '5': // zero K?
+                handACE.setMpos(0);
+                if (mode_3 == MODE_PID_KP) {
+                  eyeKp = 0;
+                } else if (mode_3 == MODE_PID_KI) {
+                  eyeKi = 0;
+                } else if (mode_3 == MODE_PID_KD) {
+                  eyeKd = 0;
+                }
+                break;
+              case '6': // restore K?
+                if (mode_3 == MODE_PID_KP) {
+                  eyeKp = eyeKpS / 100;
+                  handACE.setMpos(eyeKpS);
+                } else if (mode_3 == MODE_PID_KI) {
+                  eyeKi = eyeKiS / 100;
+                  handACE.setMpos(eyeKiS);
+                } else if (mode_3 == MODE_PID_KD) {
+                  eyeKd = eyeKdS / 100;
+                  handACE.setMpos(eyeKdS);
+                }
+                break;
+            } // switch key
+            break;
+          case MODE_ZERO_SET_DOME_PID:
+            switch (key) {
+              case '1': // select Kp
+                Serial.print("domeKp "); Serial.println(domeKp);
+                mode_3 = MODE_PID_KP;
+                handACE.setMpos((int16_t) (domeKp * 100.0));
+                lcd.setCursor(6, 0);
+                lcd.print("p");
+                break;
+              case '2': // select Ki
+                mode_3 = MODE_PID_KI;
+                handACE.setMpos((int16_t) (domeKi * 100.0));
+                lcd.setCursor(6, 0);
+                lcd.print("i");
+                break;
+              case '3': // select Kd
+                mode_3 = MODE_PID_KD;
+                handACE.setMpos((int16_t) (domeKd * 100.0));
+                lcd.setCursor(6, 0);
+                lcd.print("d");
+                break;
+              case '4': // set K?
+                if (mode_3 == MODE_PID_KP) {
+                  domeKpS = (int16_t) (domeKp * 100.0);
+                  EEPROM.put(EEPROM_domeKp, domeKpS);
+                } else if (mode_3 == MODE_PID_KI) {
+                  domeKiS = (int16_t) (domeKi * 100.0);
+                  EEPROM.put(EEPROM_domeKi, domeKiS);
+                } else if (mode_3 == MODE_PID_KD) {
+                  domeKdS = (int16_t) (domeKd * 100.0);
+                  EEPROM.put(EEPROM_domeKd, domeKdS);
+                }
+                break;
+              case '5': // zero K?
+                handACE.setMpos(0);
+                if (mode_3 == MODE_PID_KP) {
+                  domeKp = 0;
+                } else if (mode_3 == MODE_PID_KI) {
+                  domeKi = 0;
+                } else if (mode_3 == MODE_PID_KD) {
+                  domeKd = 0;
+                }
+                break;
+              case '6': // restore K?
+                if (mode_3 == MODE_PID_KP) {
+                  domeKp = domeKpS / 100;
+                  handACE.setMpos(domeKpS);
+                } else if (mode_3 == MODE_PID_KI) {
+                  domeKi = domeKiS / 100;
+                  handACE.setMpos(domeKiS);
+                } else if (mode_3 == MODE_PID_KD) {
+                  domeKd = domeKdS / 100;
+                  handACE.setMpos(domeKdS);
+                }
+                break;
             } // switch key
             break;
         } // switch mode_2

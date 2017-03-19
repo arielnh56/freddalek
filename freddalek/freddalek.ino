@@ -41,6 +41,17 @@ uint32_t lastLoop;
 uint32_t lastLcdLine2;
 char lcdbuf[17];
 
+// PID
+#include <PID_v1.h>
+double domeSetpoint, domeInput, domeOutput;
+double domeKp = 0, domeKi = 0, domeKd = 0;
+PID domePID(&domeInput, &domeOutput, &domeSetpoint, domeKp, domeKi, domeKd, DIRECT);
+int16_t domeKpS = 0, domeKiS = 0, domeKdS = 0; // saved values - actual * 100 integer so we get two decimals
+double eyeSetpoint, eyeInput, eyeOutput;
+double eyeKp = 0, eyeKi = 0, eyeKd = 0;
+PID eyePID(&eyeInput, &eyeOutput, &eyeSetpoint, eyeKp, eyeKi, eyeKd, DIRECT);
+int16_t eyeKpS = 0, eyeKiS = 0, eyeKdS = 0; // saved values = actual * 100 integer so we get two decimals
+
 const char PROGMEM nullmenu[] = "                ";
 char* lcdLine2 = (char *)nullmenu;
 
@@ -102,11 +113,59 @@ void loop() {
       }
       break;
     case MODE_ZERO:
-      if (mode_2 == MODE_ZERO_WAIT) {
-        eyeTarget = eyePos;
-        domeTarget = domePos;
-        eyeDir = MOVE_STOP;
-        domeDir = MOVE_STOP;
+      switch (mode_2) {
+        case MODE_ZERO_WAIT:
+          eyeTarget = eyePos;
+          domeTarget = domePos;
+          eyeDir = MOVE_STOP;
+          domeDir = MOVE_STOP;
+          break;
+        case MODE_ZERO_SET_EYE_PID:
+          tmp_16 = chuckPitch - headZeroV * 10;
+          if (abs(tmp_16) < 50) {
+            eyeTarget = 0;
+          } else if (tmp_16 > 0) { // up
+            eyeTarget = constrain((tmp_16 - 50) / 10, 0, eyeMax);
+          } else { // down
+            eyeTarget = constrain((tmp_16 + 50) / 10, eyeMin, 0);
+          }
+          domeTarget = domePos;
+          domeDir = MOVE_STOP;
+
+          tmp_16 = handACE.mpos();
+          if (mode_3 == MODE_PID_KP) {
+            eyeKp = tmp_16 / 100.0;
+          } else if (mode_3 == MODE_PID_KI) {
+            eyeKi = tmp_16 / 100.0;
+          } else if (mode_3 == MODE_PID_KD) {
+            eyeKd = tmp_16 / 100.0;
+          }
+          lcd.setCursor(10, 0);
+          sprintf(lcdbuf, "%05d", tmp_16);
+          lcd.print(lcdbuf);
+          lcd.setCursor(13, 0);
+          sprintf(lcdbuf, ".%02d", abs(tmp_16) % 100);
+          lcd.print(lcdbuf);
+          break;
+        case MODE_ZERO_SET_DOME_PID:
+          eyeTarget = 0;
+          domeTarget = headPos;
+
+          tmp_16 = handACE.mpos();
+          if (mode_3 == MODE_PID_KP) {
+            domeKp = tmp_16 / 100.0;
+          } else if (mode_3 == MODE_PID_KI) {
+            domeKi = tmp_16 / 100.0;
+          } else if (mode_3 == MODE_PID_KD) {
+            domeKd = tmp_16 / 100.0;
+          }
+          lcd.setCursor(10, 0);
+          sprintf(lcdbuf, "%05d", tmp_16);
+          lcd.print(lcdbuf);
+          lcd.setCursor(13, 0);
+          sprintf(lcdbuf, ".%02d", abs(tmp_16) % 100);
+          lcd.print(lcdbuf);
+          break;
       }
       break;
     case MODE_AUTO:
@@ -162,7 +221,7 @@ void loop() {
     Serial.print(targetEyeSpeed);
     Serial.print(" chuckPitch ");
     Serial.println(chuckPitch);
-*/ 
+  */
 #endif
 
   // motor control
@@ -199,28 +258,41 @@ void loop() {
     eyeSpeed = EYE_MINSPEED_DOWN;
   }
 
-  // same dir?
-  if (((domeTarget < domePos) && domeDir == MOVE_LEFT) || ((domeTarget > domePos) && domeDir == MOVE_RIGHT)) {
+  domeSetpoint = domeTarget;
+  domeInput = domePos;
+  domePID.Compute();
+  domeSpeed = map (abs((int)domeOutput), 0, 1000, DOME_MINSPEED, DOME_MAXSPEED);
+  if ( (int)domeOutput > 0 ) {
+    domeDir = MOVE_RIGHT;
+  } else if ( (int)domeOutput < 0 ) {
+    domeDir = MOVE_LEFT;
+  } else {
+    domeDir = MOVE_STOP;
+  }
+
+  /*
+    // same dir?
+    if (((domeTarget < domePos) && domeDir == MOVE_LEFT) || ((domeTarget > domePos) && domeDir == MOVE_RIGHT)) {
     targetDomeSpeed = constrain(DOME_MINSPEED - 3 + (abs(domeTarget - domePos) * 3), DOME_MINSPEED, DOME_MAXSPEED);
     if (domeSpeed < targetDomeSpeed) { // speed up
       domeSpeed = constrain(domeSpeed + domeAccel, DOME_MINSPEED, DOME_MAXSPEED);
     } else if (domeSpeed > targetDomeSpeed) { // slow down
       domeSpeed = constrain(domeSpeed - domeDecel, DOME_MINSPEED, DOME_MAXSPEED);
     }
-  } else if (((domeTarget > domePos) && domeDir == MOVE_LEFT) || ((domeTarget < domePos) && domeDir == MOVE_RIGHT)) {
+    } else if (((domeTarget > domePos) && domeDir == MOVE_LEFT) || ((domeTarget < domePos) && domeDir == MOVE_RIGHT)) {
     if (domeSpeed > DOME_MINSPEED) domeSpeed = constrain(domeSpeed - domeDecel, DOME_MINSPEED, DOME_MAXSPEED); // slow down
     if (domeSpeed <= DOME_MINSPEED) domeDir *= -1;
-  } else if (domeTarget == domePos) { // stop
+    } else if (domeTarget == domePos) { // stop
     domeDir = MOVE_STOP;
     domeSpeed = 0;
-  } else if (domePos < domeTarget && domeDir == MOVE_STOP) {
+    } else if (domePos < domeTarget && domeDir == MOVE_STOP) {
     domeDir = MOVE_RIGHT;
     domeSpeed = DOME_MINSPEED;
-  } else if (domePos > domeTarget && domeDir == MOVE_STOP) {
+    } else if (domePos > domeTarget && domeDir == MOVE_STOP) {
     domeDir = MOVE_LEFT;
     domeSpeed = DOME_MINSPEED;
-  }
-
+    }
+  */
 
   if (domeDir == MOVE_STOP) { // brake
     digitalWrite(domeM1, LOW);
